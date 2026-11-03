@@ -388,7 +388,7 @@ namespace BackPropHalloweenCandy
 
             btnPredict = new Button
             {
-                Text = "Predict Likelihood Tier",
+                Text = "Predict Popularity Tier",
                 Location = new Point(8, y),
                 Size = new Size(330, 28),
                 Enabled = false
