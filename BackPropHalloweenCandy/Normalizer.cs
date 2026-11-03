@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace BackPropHalloweenCandy
@@ -46,6 +46,21 @@ namespace BackPropHalloweenCandy
                         data[i][j] = (data[i][j] - mins[j]) / range;
                 }
             }
+        }
+
+        /// <summary>Scale a single row of input features using the fitted min/max.</summary>
+        public double[] ApplySingle(double[] row)
+        {
+            double[] normalized = new double[numCols];
+            for (int j = 0; j < numCols; ++j)
+            {
+                double range = maxs[j] - mins[j];
+                if (range == 0.0)
+                    normalized[j] = 0.0;
+                else
+                    normalized[j] = (row[j] - mins[j]) / range;
+            }
+            return normalized;
         }
     }
 }
