@@ -351,7 +351,7 @@ To run the project, you will need:
 ### 1. Clone the Repository
 
 ```bash
-git clone [YOUR-GITHUB-REPOSITORY-URL]
+git clone https://github.com/binggbongg/BackPropHalloweenCandy.git
 ```
 
 ### 2. Open the Project
