@@ -6,8 +6,7 @@ namespace BackPropHalloweenCandy
 {
     /// <summary>
     /// Custom owner-drawn panel that renders three horizontal probability bars
-    /// for Low / Medium / High tiers with labels and percentage text.
-    /// Uses only System.Drawing — no external libraries.
+    /// for Low / Medium / High tiers. Uses only System.Drawing.
     /// </summary>
     public class ProbabilityBarPanel : Panel
     {
@@ -21,9 +20,9 @@ namespace BackPropHalloweenCandy
 
         public void SetValues(double pLow, double pMed, double pHigh, double lowCut, double highCut)
         {
-            _pLow   = pLow;
-            _pMed   = pMed;
-            _pHigh  = pHigh;
+            _pLow    = pLow;
+            _pMed    = pMed;
+            _pHigh   = pHigh;
             _lowCut  = lowCut;
             _highCut = highCut;
         }
@@ -32,52 +31,47 @@ namespace BackPropHalloweenCandy
         {
             base.OnPaint(e);
             var g = e.Graphics;
-            g.Clear(Color.FromArgb(30, 30, 30));
 
             if (_pLow == 0 && _pMed == 0 && _pHigh == 0) return;
 
             double[] probs  = { _pLow, _pMed, _pHigh };
-            string[] labels = { $"Low    (< {_lowCut:F1}%)", $"Medium ({_lowCut:F1}% – {_highCut:F1}%)", $"High   (≥ {_highCut:F1}%)" };
-            Color[]  colors =
+            string[] labels =
             {
-                Color.FromArgb(220, 80,  50),
-                Color.FromArgb(220, 180, 50),
-                Color.FromArgb(60,  180, 60)
+                $"Low    (< {_lowCut:F1}%)",
+                $"Medium ({_lowCut:F1}% - {_highCut:F1}%)",
+                $"High   (>= {_highCut:F1}%)"
             };
 
-            int barHeight = 24;
-            int gap       = 10;
-            int labelW    = 220;
-            int barMaxW   = this.Width - labelW - 90;
-            int startY    = 8;
-
-            using var fontLabel  = new Font("Segoe UI", 9f);
-            using var fontPct    = new Font("Segoe UI", 9f, FontStyle.Bold);
-            using var brushText  = new SolidBrush(Color.Silver);
-            using var brushTrack = new SolidBrush(Color.FromArgb(55, 55, 58));
+            int barHeight = 22;
+            int gap       = 8;
+            int labelW    = 200;
+            int barMaxW   = this.Width - labelW - 70;
+            int startY    = 6;
 
             for (int i = 0; i < 3; i++)
             {
                 int y = startY + i * (barHeight + gap);
 
                 // Label
-                g.DrawString(labels[i], fontLabel, brushText, 4, y + 4);
+                g.DrawString(labels[i], this.Font, SystemBrushes.ControlText, 2, y + 3);
 
-                // Track background
+                // Track background (using a standard control-shadow color)
                 var trackRect = new Rectangle(labelW, y, barMaxW, barHeight);
-                g.FillRectangle(brushTrack, trackRect);
+                g.FillRectangle(SystemBrushes.ControlDark, trackRect);
+                g.DrawRectangle(SystemPens.ControlDarkDark, trackRect);
 
-                // Filled bar
+                // Filled portion
                 int filledW = (int)(probs[i] * barMaxW);
                 if (filledW > 0)
                 {
-                    using var brushBar = new SolidBrush(colors[i]);
-                    g.FillRectangle(brushBar, labelW, y, filledW, barHeight);
+                    g.FillRectangle(SystemBrushes.ActiveCaption,
+                        labelW, y, filledW, barHeight);
                 }
 
                 // Percentage text
                 string pct = probs[i].ToString("P1");
-                g.DrawString(pct, fontPct, Brushes.White, labelW + barMaxW + 6, y + 4);
+                g.DrawString(pct, this.Font, SystemBrushes.ControlText,
+                    labelW + barMaxW + 4, y + 3);
             }
         }
     }

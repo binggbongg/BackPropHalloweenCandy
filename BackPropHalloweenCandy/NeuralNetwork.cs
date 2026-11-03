@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 
 namespace BackPropHalloweenCandy
 {
@@ -165,7 +165,7 @@ namespace BackPropHalloweenCandy
 
         public double[] Train(double[][] trainData, double[][] testData, int maxEpochs,
             double learnRate, double momentum, bool useCrossEntropy, double weightDecay,
-            int logInterval, string logPath)
+            int logInterval, string logPath, Action<int, double, double>? onProgress = null)
         {
             // train using back-prop
             // back-prop specific arrays
@@ -211,6 +211,7 @@ namespace BackPropHalloweenCandy
                             "  testLoss = " + testErr.ToString("F4"));
                         log.WriteLine(epoch + "," + trainErr.ToString("F4") + "," +
                           testErr.ToString("F4"));
+                        onProgress?.Invoke(epoch, trainErr, testErr);
                     }
 
                     Shuffle(sequence); // visit each training data in random order
