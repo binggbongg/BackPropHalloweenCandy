@@ -316,6 +316,19 @@ namespace BackPropHalloweenCandy
                     } // each training item
 
                 } // while
+
+                if (maxEpochs % errInterval != 0)
+                {
+                    double trainErr = Error(trainData, useCrossEntropy, weightDecay);
+                    double testErr = Error(testData, useCrossEntropy, weightDecay);
+
+                    Console.WriteLine(
+                        $"Epoch {maxEpochs}: Train Loss = {trainErr:F4}, Test Loss = {testErr:F4}");
+
+                    log.WriteLine($"{maxEpochs},{trainErr:F4},{testErr:F4}");
+
+                    onProgress?.Invoke(maxEpochs, trainErr, testErr);
+                }
             } // using
             double[] bestWts = GetWeights();
             return bestWts;
