@@ -29,13 +29,31 @@ The project uses `candy-data.csv`, a dataset containing information about differ
 
 [Link to the original dataset.](https://www.kaggle.com/datasets/fivethirtyeight/the-ultimate-halloween-candy-power-ranking/data)
 
-Each row represents a candy and contains its name, attributes, and associated win percentage.
+The data was collected from a website where participants chose which of two fun-sized candies they would rather receive. More than 269,000 votes were collected from 8,371 different IP addresses. Each row of the CSV is one candy.
+ 
+- **85 candies (rows)**, 13 columns
+- **No missing values**
+- The loader still skips and reports any row with the wrong number of columns or a value that cannot be parsed
 
 ### Features
-
-The dataset contains **11 input features** describing the characteristics of each candy. These features are used by the neural network to identify patterns associated with candy win percentages.
-
-The original win percentage is used to determine the classification target.
+ 
+| Feature | Type | Meaning |
+|---|---|---|
+| `chocolate` | Binary (0/1) | Contains chocolate |
+| `fruity` | Binary | Fruit flavored |
+| `caramel` | Binary | Contains caramel |
+| `peanutyalmondy` | Binary | Contains peanuts, peanut butter, or almonds |
+| `nougat` | Binary | Contains nougat |
+| `crispedricewafer` | Binary | Contains crisped rice, wafers, or a cookie component |
+| `hard` | Binary | Hard candy |
+| `bar` | Binary | Candy bar |
+| `pluribus` | Binary | One of many candies in a bag or box |
+| `sugarpercent` | Continuous (0–1) | Sugar percentile within the dataset |
+| `pricepercent` | Continuous (0–1) | Unit price percentile within the dataset |
+ 
+`competitorname` is only an identifier. It is kept for display in the prediction tables and is **not** used as an input.
+ 
+`winpercent` (the overall win percentage across about 269,000 matchups) is used **only to create the target class**. It is deliberately excluded from the inputs, because including it would leak the answer to the network.
 
 ### Target Classes
 
@@ -69,9 +87,7 @@ The following preprocessing steps are performed:
 
 The Min-Max normalization formula is:
 
-\[
-X_{normalized}=\frac{X-X_{min}}{X_{max}-X_{min}}
-\]
+$$X_{normalized}=\frac{X-X_{min}}{X_{max}-X_{min}}$$
 
 Constant-value columns are assigned a normalized value of zero to prevent division-by-zero errors.
 
@@ -91,25 +107,17 @@ The project uses a three-layer feedforward neural network with the following arc
 
 **1. Hyperbolic Tangent (Tanh)**
 
-The hidden layer uses the Tanh activation function to introduce nonlinearity into the network.
+The hidden layer uses the Tanh activation function to introduce nonlinearity into the network. Its output ranges from -1 to 1.
 
-\[
-\tanh(x)=\frac{e^x-e^{-x}}{e^x+e^{-x}}
-\]
-
-Its output ranges from -1 to 1.
+$$\tanh(x)=\frac{e^x-e^{-x}}{e^x+e^{-x}}$$
 
 **2. Softmax**
 
 The output layer uses Softmax to convert the output scores into probabilities.
 
-\[
-P(y_i)=\frac{e^{z_i}}{\sum_j e^{z_j}}
-\]
+$$P(y_i)=\frac{e^{z_i}}{\sum_j e^{z_j}}$$
 
-The resulting probabilities sum to 1, allowing the network to perform three-class classification.
-
-The class with the highest predicted probability is selected as the final prediction.
+The class with the highest predicted probability is the final prediction (winner-takes-all).
 
 ## Learning and Optimization Techniques
 
@@ -138,13 +146,11 @@ The process involves:
 
 The implementation supports categorical cross-entropy as its primary loss function.
 
-\[
-L=-\sum_{i=1}^{3}t_i\log(y_i)
-\]
+$$L=-\sum_{i=1}^{3}t_i\log(y_i)$$
 
 Where:
-- \(t_i\) represents the actual target value.
-- \(y_i\) represents the predicted probability.
+- $t_i$ represents the actual target value.
+- $y_i$ represents the predicted probability.
 
 Cross-entropy measures the difference between the actual class distribution and the predicted probability distribution.
 
@@ -154,9 +160,7 @@ The implementation also includes an optional Mean Squared Error (MSE) loss confi
 
 Weight decay discourages excessively large weights by introducing a regularization penalty.
 
-\[
-L_{total}=L_{prediction}+\frac{\lambda}{2}\sum w^2
-\]
+$$L_{total}=L_{prediction}+\frac{\lambda}{2}\sum w^2$$
 
 This helps reduce overfitting by encouraging smaller weight values.
 
@@ -166,18 +170,13 @@ The regularization term is applied to the input-to-hidden and hidden-to-output w
 
 Momentum incorporates previous weight adjustments into the current update.
 
-\[
-\Delta w_t=\eta(g_t-\lambda w_t)+\alpha\Delta w_{t-1}
-\]
+$$\Delta w_t=\eta(g_t-\lambda w_t)+\alpha\Delta w_{t-1}$$
 
 Where:
-- \(\eta\) is the learning rate.
-- \(g_t\) is the current gradient under the implementation's update convention.
-- \(\lambda\) is the weight decay coefficient.
-- \(\alpha\) is the momentum coefficient.
-- \(\Delta w_{t-1}\) is the previous weight adjustment.
-
-Momentum helps maintain the direction of previous updates during training.
+- $\eta$ = the learning rate.
+- $g_t$ = the current gradient under the implementation's update convention.
+- $\lambda$ = the weight decay coefficient.
+- $\alpha$ = the momentum coefficient.
 
 ## Hyperparameters
 
@@ -209,30 +208,29 @@ The logging interval is currently set to 100 epochs.
 Example console output format:
 
 ```text
-Starting training
-
-epoch = 100  trainLoss = [actual value]  testLoss = [actual value]
-epoch = 200  trainLoss = [actual value]  testLoss = [actual value]
-epoch = 300  trainLoss = [actual value]  testLoss = [actual value]
+[hh:mm:ss] Loading candy-data.csv...
+[hh:mm:ss] Loaded 85 candies with 11 features.
+[hh:mm:ss] Tiers: Low < 42.18% | Medium 42.18%-55.38% | High >= 55.38%
+[hh:mm:ss] Split: 68 train / 17 test.
+[hh:mm:ss] Features normalized [0,1] on training data.
+[hh:mm:ss] Network: 11-5-3 | epochs=1000 lr=0.0500 mom=0.0100 wd=0.0100 cross-entropy=True
+[hh:mm:ss] Training...
+[hh:mm:ss] epoch = 100   trainLoss = 0.8328   testLoss = 0.7305
+[hh:mm:ss] epoch = 200   trainLoss = 0.7977   testLoss = 7699
 ...
-epoch = 900  trainLoss = [actual value]  testLoss = [actual value]
-
-Done
+[hh:mm:ss] epoch = 1000  trainLoss = 0.7932   testLoss = 0.7779
+[hh:mm:ss] Done!  Train accuracy = 69.12%  |  Test accuracy = 82.35%
 ```
-
-*Note: Replace the placeholders with actual values from your program's execution.*
 
 ### CSV Training Log
 
-The program automatically generates `training_log.csv`, containing the following columns:
-
+`training_log.csv` is created in the program's output folder (next to the executable, for example `bin/Debug/net.../`). It is **overwritten on every training run**, so copy or rename it after each experiment if you want to keep it (for example `training_log_lr0.1.csv`).
+ 
 | Column | Description |
 |---|---|
-| epoch | Current training epoch |
-| trainLoss | Training dataset loss |
-| testLoss | Testing dataset loss |
-
-This file can be used to monitor the model's learning progress and visualize changes in training and testing loss across epochs.
+| epoch | Training epoch |
+| trainLoss | Loss on the training set (includes the weight-decay penalty) |
+| testLoss | Loss on the test set (includes the weight-decay penalty) |
 
 ### Training Loss Visualization
 
@@ -250,20 +248,16 @@ After training, the program evaluates the model using classification accuracy on
 
 Accuracy measures the proportion of correctly classified examples.
 
-\[
-Accuracy=\frac{\text{Correct Predictions}}{\text{Total Predictions}}
-\]
+$$Accuracy=\frac{\text{Correct Predictions}}{\text{Total Predictions}}$$
 
 The program uses a winner-takes-all approach, selecting the class with the highest predicted probability.
 
 ### Evaluation Output
 
 ```text
-Final accuracy on training data = [actual value]
-Final accuracy on test data     = [actual value]
+Final accuracy on training data = [48/68]
+Final accuracy on test data     = [9/17]
 ```
-
-*Note: Insert the actual accuracy values generated by your program.*
 
 ### Performance Analysis
 
@@ -292,11 +286,18 @@ The following parameters can be modified in `Program.cs`:
 
 Use the following table to document the results of your experiments:
 
-| Experiment | Hidden Neurons | Epochs | Learning Rate | Momentum | Weight Decay | Loss Function | Test Accuracy |
-|---|---:|---:|---:|---:|---:|---|---:|
-| Baseline | 5 | 1,000 | 0.05 | 0.01 | 0.01 | Cross-Entropy | TBD |
-| Experiment 2 | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
-| Experiment 3 | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
+| # | Experiment | Hidden | Epochs | Learning Rate | Momentum | Weight Decay | Loss | Final Train Loss | Final Test Loss | Train Acc | Test Acc |
+|---|---|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|
+| 1 | Baseline | 5 | 1,000 | 0.05 | 0.01 | 0.01 | CE | 0.7932 | 0.7779 | 69.12% | 82.35% |
+| 2 | Lower learning rate | 5 | 1,000 | 0.01 | 0.01 | 0.01 | CE | 0.7741 | 0.7951 | 69.12% | 76.47% |
+| 3 | Higher learning rate | 5 | 1,000 | 0.10 | 0.01 | 0.01 | CE | 0.8504 | 0.7748 | 66.18% | 82.35% |
+| 4 | Many hidden nodes | 12 | 1,000 | 0.05 | 0.01 | 0.01 | CE | 0.8371 | 0.8286 | 72.06% | 76.47% |
+| 5 | Fewer epochs | 5 | 500 | 0.05 | 0.01 | 0.01 | CE | 0.8118 | 0.8177 | 72.06% | 76.47% |
+| 6 | More epochs | 5 | 2,000 | 0.05 | 0.01 | 0.01 | CE | 0.7803 | 0.8021 | 67.65% | 76.47% |
+| 7 | No weight decay | 5 | 1,000 | 0.05 | 0.01 | 0.00 | CE | 0.2627 | 1.6904 | 88.24% | 58.82% |
+| 8 | Lower weight decay | 5 | 1,000 | 0.05 | 0.01 | 0.001 | CE | 0.4344 | 1.0238 | 83.82% | 64.71% |
+| 9 | Higher momentum | 5 | 1,000 | 0.05 | 0.50 | 0.01 | CE | 0.8209 | 0.7600 | 66.18% | 82.35% |
+| 10 | MSE loss | 5 | 1,000 | 0.05 | 0.01 | 0.01 | MSE | 0.5263 | 0.4791 | 60.29% | 70.59% |
 
 The purpose of these experiments is to identify a configuration that achieves good classification performance while maintaining consistent training and testing results.
 
