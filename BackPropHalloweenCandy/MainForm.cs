@@ -338,11 +338,11 @@ namespace BackPropHalloweenCandy
             {
                 Text = "Continuous Attributes",
                 Location = new Point(8, y),
-                Size = new Size(330, 120)
+                Size = new Size(330, 155)
             };
 
             string[] contLabels = { "Sugar Percentile (0.0 - 1.0)", "Price Percentile (0.0 - 1.0)" };
-            int cy = 18;
+            int cy = 22;
             for (int i = 0; i < 2; i++)
             {
                 int capturedI = i;
@@ -361,7 +361,7 @@ namespace BackPropHalloweenCandy
                     AutoSize = true
                 };
                 grpCont.Controls.Add(lblContinuousVal[i]);
-                cy += 18;
+                cy += 20;
 
                 trkContinuous[i] = new TrackBar
                 {
@@ -380,7 +380,7 @@ namespace BackPropHalloweenCandy
                         (trkContinuous[capturedI].Value / 100.0).ToString("F2");
                 };
                 grpCont.Controls.Add(trkContinuous[i]);
-                cy += 40;
+                cy += 44;
             }
 
             scrollPanel.Controls.Add(grpCont);
